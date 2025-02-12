@@ -5,6 +5,9 @@ interface FlowStep {
   input: "yes/no" | "ai assistant" | "end" | string;
 }
 
+// 環境変数を読み込む
+const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+
 // フローチャートデータを保持する変数（外部からfetchする）
 let flowData: { steps: FlowStep[] } | null = null;
 
@@ -158,7 +161,7 @@ noBtn.addEventListener("click", () => {
 });
 
 // AIアシスタント用入力（箇条書きなど）送信イベント
-aiSubmit.addEventListener("click", () => {
+aiSubmit.addEventListener("click", async () => {
   const userInput = aiInput.value.trim();
   console.log("AI submit clicked with input:", userInput);
   if (!userInput) {
@@ -166,12 +169,39 @@ aiSubmit.addEventListener("click", () => {
     return;
   }
 
-  // 必要に応じてOpenAI API等に問い合わせる
-  alert(`AIに送信: ${userInput}`);
-  aiInput.value = "";
+  try {
+    // OpenAI API リクエストの作成
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [{ role: "user", content: userInput }],
+        max_tokens: 100
+      })
+    });
 
-  goToNextStep("Next");
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.statusText}`);
+    }
+
+    const responseData = await response.json();
+    const aiReply = responseData.choices[0].message.content;
+    console.log("AI Response:", aiReply);
+
+    alert(`AIの回答: ${aiReply}`);
+    aiInput.value = "";
+
+    goToNextStep("Next");
+  } catch (error) {
+    console.error("Error communicating with OpenAI API:", error);
+    alert("AIの応答を取得できませんでした。");
+  }
 });
+
 
 // アプリ起動時にフローチャートを初期化
 initFlowchart();
