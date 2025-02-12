@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>創作相談AI</title>
+    <link rel="stylesheet" href="assets/styles/style.css">
+</head>
+<body>
+    <div id="top-screen">
+        <button id="start-button">クリエーションの悩みを相談する</button>
+        <button id="settings-button">プロンプト設定</button>
+    </div>
+
+    <div id="settings-screen" style="display: none;">
+        <h2>プロンプト設定</h2>
+        <textarea id="prompt-input">
+あなたは、創作に関する悩みを解決するAIアドバイザーです。
+提供されたフローチャートを基にユーザーの悩みを分析し、適切な質問を行いながら最適な回答を導いてください。
+ただし、ユーザーが答えに迷った場合は、フローチャートの選択肢にこだわりすぎず、柔軟に対応してください。
+
+- ユーザーの悩みを整理し、Yes/Noで答えられる質問をする。
+- フローチャートの分岐に沿って、適切な質問を続ける。
+- ユーザーが答えに詰まった場合は、選択肢を言い換えたり、別の視点からアプローチする。
+- 最終的に、ユーザーにとって最適な解決策をわかりやすく提示する。
+
+ユーザー: 「創作に自信が持てないです」
+AI: 「それは辛いですね。最近、自分の作品に満足できることはありましたか？（Yes/No）」
+        </textarea>
+        <button id="save-prompt-button">保存</button>
+        <button id="back-button">戻る</button>
+    </div>
+
+    <div id="dialogue-screen" style="display: none;">
+        <div id="ai-message">AIの質問がここに表示されます</div>
+        <div id="options">
+            <button class="option">1</button>
+            <button class="option">2</button>
+            <button class="option">3</button>
+            <button class="option">4</button>
+        </div>
+        <input type="text" id="user-input" placeholder="自由入力（必要に応じて入力してください）">
+        <button id="submit-button">送信</button>
+    </div>
+
+    <script src="scripts/script.ts"></script>
+    <script>
+        document.getElementById("start-button").addEventListener("click", function() {
+            document.getElementById("top-screen").style.display = "none";
+            document.getElementById("dialogue-screen").style.display = "block";
+        });
+
+        document.getElementById("settings-button").addEventListener("click", function() {
+            document.getElementById("top-screen").style.display = "none";
+            document.getElementById("settings-screen").style.display = "block";
+        });
+
+        document.getElementById("back-button").addEventListener("click", function() {
+            document.getElementById("settings-screen").style.display = "none";
+            document.getElementById("top-screen").style.display = "block";
+        });
+
+        document.getElementById("save-prompt-button").addEventListener("click", function() {
+            alert("プロンプトが保存されました！");
+        });
+    </script>
+</body>
+</html>
