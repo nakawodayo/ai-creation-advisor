@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const backButton = document.getElementById("back-button") as HTMLButtonElement | null;
     const submitButton = document.getElementById("submit-button") as HTMLButtonElement | null;
     const homeButton = document.getElementById("home-button") as HTMLButtonElement | null;
-    console.log("🔍 homeButton:", homeButton); // home-button が取得できているか確認
 
     const topScreen = document.getElementById("top-screen") as HTMLDivElement | null;
     const dialogueScreen = document.getElementById("dialogue-screen") as HTMLDivElement | null;
@@ -40,10 +39,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (homeButton && dialogueScreen && topScreen) {
-        homeButton.addEventListener("click", () => {    
+        homeButton.addEventListener("click", () => {
             // すべての画面を非表示にする
             dialogueScreen.style.display = "none";
-            settingsScreen.style.display = "none";
+            
+            if (settingsScreen) { 
+                settingsScreen.style.display = "none";
+            }
     
             // TOP画面を表示
             topScreen.style.display = "flex"; // 必要に応じて "block" に変更
