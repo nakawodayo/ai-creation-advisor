@@ -1,0 +1,34 @@
+{
+  "steps": [
+    {
+      "id": "1",
+      "question": "クリエーションに関する悩みがある？",
+      "options": { "Yes": "2", "No": "end" },
+      "input": "yes/no"
+    },
+    {
+      "id": "2",
+      "question": "戯曲が書けない？",
+      "options": { "Yes": "3", "No": "8" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3",
+      "question": "シーンが作れない？",
+      "options": { "Yes": "5", "No": "5" },
+      "input": "yes/no"
+    },
+    {
+      "id": "5",
+      "question": "気になっていることを箇条書きにしてみましょう",
+      "options": { "Next": "7" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "7",
+      "question": "問題が明確になりましたか？",
+      "options": { "Yes": "end", "No": "13" },
+      "input": "yes/no"
+    }
+  ]
+}

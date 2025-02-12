@@ -1,0 +1,33 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+  }
+  
+  #question {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .button-group {
+    margin-top: 1rem;
+  }
+  
+  .button-group button {
+    margin-right: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* 確実に非表示にするには !important を付けてもOK */
+  .hidden {
+    display: none;
+  }
+  
+  .textfield {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  

@@ -1,167 +1,177 @@
-import { initialPrompt } from "./prompts";
-
-// Viteの場合: import.meta.env.VITE_OPENAI_API_KEY
-// Webpackなら process.env.OPENAI_API_KEY などの設定方法を想定
-const apiKey = import.meta.env.VITE_OPENAI_API_KEY || "YOUR_FALLBACK_API_KEY";
-
-//--------------------------------------------------
-// 1. OpenAI 連携用の関数
-//--------------------------------------------------
-async function fetchAIResponse(userText: string): Promise<string> {
-  try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-3.5-turbo", // 必要に応じて変更
-        messages: [{ role: "user", content: userText }],
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
-  } catch (error) {
-    console.error(error);
-    return "エラーが発生しました。";
-  }
+interface FlowStep {
+  id: string;
+  question: string;
+  options?: Record<string, string>;
+  input: "yes/no" | "ai assistant" | "end" | string;
 }
 
-//--------------------------------------------------
-// 2. UI要素の取得と画面制御
-//--------------------------------------------------
-function getUIElements() {
-  return {
-    startButton: document.getElementById("start-button") as HTMLButtonElement | null,
-    settingsButton: document.getElementById("settings-button") as HTMLButtonElement | null,
-    backButton: document.getElementById("back-button") as HTMLButtonElement | null,
-    submitButton: document.getElementById("submit-button") as HTMLButtonElement | null,
-    homeButton: document.getElementById("home-button") as HTMLButtonElement | null,
+// フローチャートデータを保持する変数（外部からfetchする）
+let flowData: { steps: FlowStep[] } | null = null;
 
-    topScreen: document.getElementById("top-screen") as HTMLDivElement | null,
-    dialogueScreen: document.getElementById("dialogue-screen") as HTMLDivElement | null,
-    settingsScreen: document.getElementById("settings-screen") as HTMLDivElement | null,
+// 現在のステップID
+let currentStepId: string = "1";
 
-    aiMessage: document.getElementById("ai-message") as HTMLDivElement | null,
-    userInput: document.getElementById("user-input") as HTMLInputElement | null,
-
-    optionButtons: document.querySelectorAll<HTMLButtonElement>('.option'),
-  };
-}
-
-//--------------------------------------------------
-// 3. 各種イベントハンドラのセットアップ
-//--------------------------------------------------
-
-// 画面遷移や画面表示切り替え
-function initNavigation(ui: ReturnType<typeof getUIElements>) {
-  const {
-    startButton,
-    settingsButton,
-    backButton,
-    homeButton,
-    topScreen,
-    dialogueScreen,
-    settingsScreen,
-    aiMessage,
-  } = ui;
-
-  // TOP画面から対話画面へ移動
-  if (startButton && topScreen && dialogueScreen && aiMessage) {
-    startButton.addEventListener("click", async () => {
-      topScreen.style.display = "none";
-      dialogueScreen.style.display = "block";
-
-      aiMessage.textContent = "AIの応答を取得中...";
-      const response = await fetchAIResponse(initialPrompt);
-      aiMessage.textContent = response;
-    });
-  }
-
-  // TOP画面 -> プロンプト設定画面
-  if (settingsButton && topScreen && settingsScreen) {
-    settingsButton.addEventListener("click", () => {
-      topScreen.style.display = "none";
-      settingsScreen.style.display = "block";
-    });
-  }
-
-  // 設定画面 -> TOP画面
-  if (backButton && settingsScreen && topScreen) {
-    backButton.addEventListener("click", () => {
-      settingsScreen.style.display = "none";
-      topScreen.style.display = "block";
-    });
-  }
-
-  // ホームボタンで最初に戻る
-  if (homeButton && dialogueScreen && topScreen) {
-    homeButton.addEventListener("click", () => {
-      dialogueScreen.style.display = "none";
-      if (settingsScreen) {
-        settingsScreen.style.display = "none";
-      }
-      topScreen.style.display = "flex"; // または "block"
-    });
-  }
-}
-
-// Yes/Noボタン用
-function initYesNoButtons(ui: ReturnType<typeof getUIElements>) {
-  const { optionButtons, aiMessage } = ui;
-
-  optionButtons.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const userText = btn.dataset.value || "";
-      if (!aiMessage) return;
-
-      aiMessage.textContent = "AIの応答を取得中...";
-      const response = await fetchAIResponse(userText);
-      aiMessage.textContent = response;
-    });
+// DOM要素の取得
+const questionEl = document.getElementById("question") as HTMLDivElement;
+const yesNoButtonsEl = document.getElementById("yesNoButtons") as HTMLDivElement;
+const yesBtn = document.getElementById("yesBtn") as HTMLButtonElement;
+const noBtn = document.getElementById("noBtn") as HTMLButtonElement;
+const app = document.getElementById("app") as HTMLDivElement;
+const aiAssistantArea = document.getElementById("aiAssistantArea") as HTMLDivElement;
+const aiInput = document.getElementById("aiInput") as HTMLTextAreaElement;
+const aiSubmit = document.getElementById("aiSubmit") as HTMLButtonElement;
+const resetContainer = document.getElementById("resetContainer") as HTMLDivElement;
+// 「最初からやり直す」ボタン
+const resetBtn = document.getElementById("resetBtn") as HTMLButtonElement | null;
+if (resetBtn) {
+  resetBtn.addEventListener("click", () => {
+    console.log("Reset button clicked.");
+    currentStepId = "1";   // 1番のステップに戻す
+    showStep(currentStepId);
   });
 }
 
-// 自由入力用
-function initSubmitHandler(ui: ReturnType<typeof getUIElements>) {
-  const { submitButton, userInput, aiMessage } = ui;
+/**
+ * flowchart.json を読み込み、flowDataを初期化してから初回ステップを表示する
+ */
+async function initFlowchart() {
+  try {
+    console.log("Initializing flowchart...");
+    // flowchart.jsonをfetch
+    const response = await fetch("/flowchart.json");
+    if (!response.ok) {
+      throw new Error("flowchart.jsonの読み込みに失敗しました。");
+    }
+    flowData = await response.json();
+    console.log("Flowchart data loaded:", flowData);
 
-  if (submitButton && userInput && aiMessage) {
-    submitButton.addEventListener("click", async () => {
-      const userText = userInput.value.trim();
-      if (!userText) return;
-
-      aiMessage.textContent = "AIの応答を取得中...";
-      const response = await fetchAIResponse(userText);
-      aiMessage.textContent = response;
-      userInput.value = "";
-    });
+    // 初期ステップを表示
+    showStep(currentStepId);
+  } catch (error) {
+    console.error("Error initializing flowchart:", error);
+    questionEl.textContent = "フローチャートの読み込みに失敗しました。";
   }
 }
 
-//--------------------------------------------------
-// 4. エントリーポイント
-//--------------------------------------------------
-function initApp() {
-  console.log("✅ ページが読み込まれました");
-
-  const ui = getUIElements();
-
-  // 画面遷移イベント
-  initNavigation(ui);
-  // Yes/Noボタンイベント
-  initYesNoButtons(ui);
-  // ユーザー入力イベント
-  initSubmitHandler(ui);
+/**
+ * ステップIDから該当ステップを取り出す
+ */
+function getStepById(id: string): FlowStep | undefined {
+  console.log("Getting step by ID:", id);
+  return flowData?.steps.find((step) => step.id === id);
 }
 
-//--------------------------------------------------
-// 5. DOMContentLoaded で初期化
-//--------------------------------------------------
-document.addEventListener("DOMContentLoaded", initApp);
+/**
+ * 指定したステップを画面に表示する
+ */
+function showStep(stepId: string) {
+  console.log("Showing step:", stepId);
+
+  // 終了ステップの処理
+  if (stepId === "end") {
+    console.warn("End of flowchart reached.");
+    questionEl.textContent = "フローチャートが終了しました。お疲れさまでした。";
+
+    yesNoButtonsEl.classList.add("hidden");
+    resetContainer.classList.remove("hidden");
+    resetBtn?.classList.remove("hidden");
+
+    // AIアシスタントエリアを削除
+    if (aiAssistantArea.parentNode) {
+      aiAssistantArea.remove();
+    }
+    return;
+  }
+
+  // 通常のステップ処理
+  const step = getStepById(stepId);
+  if (!step) {
+    console.warn("Step not found, showing end message.");
+    showStep("end");
+    return;
+  }
+
+  // 質問を表示
+  questionEl.textContent = step.question;
+
+  // 入力形式ごとの処理
+  if (step.input === "yes/no") {
+    yesNoButtonsEl.classList.remove("hidden");
+    if (stepId !== "1") {
+      resetContainer.classList.remove("hidden");
+      resetBtn?.classList.remove("hidden");
+    } else {
+      resetContainer.classList.add("hidden");
+      resetBtn?.classList.add("hidden");
+    }
+    if (aiAssistantArea.parentNode) {
+      aiAssistantArea.remove();
+    }
+  } else if (step.input === "ai assistant") {
+    yesNoButtonsEl.classList.add("hidden");
+    resetContainer.classList.remove("hidden");
+    resetBtn?.classList.remove("hidden");
+    if (!aiAssistantArea.parentNode) {
+      app.appendChild(aiAssistantArea);
+    }
+  }
+}
+
+
+/**
+ * 次のステップに遷移する
+ */
+function goToNextStep(optionKey: string) {
+  console.log("Going to next step with option:", optionKey);
+  if (!flowData) {
+    console.warn("Flow data not loaded.");
+    return;
+  }
+
+  const step = getStepById(currentStepId);
+  if (!step || !step.options) {
+    console.warn("Current step or options not found.");
+    return;
+  }
+
+  const nextStepId = step.options[optionKey];
+  if (!nextStepId || nextStepId === "end") {
+    console.log("Next step is end.");
+    currentStepId = "end";
+    showStep(currentStepId);
+    return;
+  }
+
+  currentStepId = nextStepId;
+  console.log("Next step ID:", currentStepId);
+  showStep(currentStepId);
+}
+
+// Yes/No ボタンイベント
+yesBtn.addEventListener("click", () => {
+  console.log("Yes button clicked.");
+  goToNextStep("Yes");
+});
+noBtn.addEventListener("click", () => {
+  console.log("No button clicked.");
+  goToNextStep("No");
+});
+
+// AIアシスタント用入力（箇条書きなど）送信イベント
+aiSubmit.addEventListener("click", () => {
+  const userInput = aiInput.value.trim();
+  console.log("AI submit clicked with input:", userInput);
+  if (!userInput) {
+    alert("入力が空です。何か入力してから送信してください。");
+    return;
+  }
+
+  // 必要に応じてOpenAI API等に問い合わせる
+  alert(`AIに送信: ${userInput}`);
+  aiInput.value = "";
+
+  goToNextStep("Next");
+});
+
+// アプリ起動時にフローチャートを初期化
+initFlowchart();

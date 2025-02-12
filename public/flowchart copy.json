@@ -1,0 +1,142 @@
+{
+  "steps": [
+    {
+      "id": "1",
+      "question": "クリエーションに関する悩みがある？",
+      "options": { "Yes": "2", "No": "end" },
+      "input": "yes/no"
+    },
+    {
+      "id": "2",
+      "question": "戯曲が書けない？",
+      "options": { "Yes": "3", "No": "8" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3",
+      "question": "シーンが作れない？",
+      "options": { "Yes": "4", "No": "5" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3a",
+      "question": "キャラクターの動きや感情がうまく描けない？",
+      "options": { "Yes": "3b", "No": "3b" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3b",
+      "question": "シーンの目的や場面転換がはっきりしない？",
+      "options": { "Yes": "3c", "No": "3c" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3c",
+      "question": "台詞のやり取りや演出が難しい？",
+      "options": { "Yes": "3d", "No": "3d" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3d",
+      "question": "他に思いつく原因がある？（小道具の使い方、音響や照明など）",
+      "options": { "Yes": "3e", "No": "5" },
+      "input": "yes/no"
+    },
+    {
+      "id": "3e",
+      "question": "どんな点を悩んでいるか箇条書きにしてみましょう",
+      "options": { "Next": "4" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "4",
+      "question": "構成ができない？",
+      "options": { "Yes": "4a", "No": "7" },
+      "input": "yes/no"
+    },
+    {
+      "id": "4a",
+      "question": "ストーリーの全体像がつかめない？（起承転結、クライマックス、結末など）",
+      "options": { "Yes": "4b", "No": "4b" },
+      "input": "yes/no"
+    },
+    {
+      "id": "4b",
+      "question": "テーマが不明確で、どの要素を主軸にするか決められない？",
+      "options": { "Yes": "4c", "No": "4c" },
+      "input": "yes/no"
+    },
+    {
+      "id": "4c",
+      "question": "シーン間のつながりや配置がうまくいかない？（時系列の整理、場面転換など）",
+      "options": { "Yes": "4d", "No": "4d" },
+      "input": "yes/no"
+    },
+    {
+      "id": "4d",
+      "question": "展開に緩急がなく、全体の流れが単調になっている？",
+      "options": { "Yes": "4e", "No": "4e" },
+      "input": "yes/no"
+    },
+    {
+      "id": "4e",
+      "question": "どんな点を悩んでいるか箇条書きにしましょう",
+      "options": { "Next": "6" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "5",
+      "question": "気になっていることを箇条書きにしてみましょう",
+      "options": { "Next": "6" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "6",
+      "question": "書いたものをAIに読ませて、質問してもらう",
+      "options": { "Next": "7" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "7",
+      "question": "問題が明確になりましたか？",
+      "options": { "Next": "8" },
+      "input": "yes/no"
+    },
+    {
+      "id": "8",
+      "question": "戯曲以外の創作上の悩みがありますか？（演出、集客、プロデュースなど）",
+      "options": { "Yes": "9", "No": "end" },
+      "input": "yes/no"
+    },
+    {
+      "id": "9",
+      "question": "演出で悩んでいますか？",
+      "options": { "Yes": "10", "No": "13" },
+      "input": "yes/no"
+    },
+    {
+      "id": "10",
+      "question": "演出のどんな点で悩んでいるか、箇条書きにしてみましょう",
+      "options": { "Next": "11" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "11",
+      "question": "書いたものをAIに読ませて、質問してもらいましょう",
+      "options": { "Next": "12" },
+      "input": "ai assistant"
+    },
+    {
+      "id": "12",
+      "question": "問題が明確になりましたか？",
+      "options": { "Yes": "end", "No": "9" },
+      "input": "yes/no"
+    },
+    {
+      "id": "13",
+      "question": "他の悩みはありますか？（集客やプロデュースなど）",
+      "options": { "Yes": "10", "No": "end" },
+      "input": "yes/no"
+    }
+  ]
+}

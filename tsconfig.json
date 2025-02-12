@@ -6,7 +6,9 @@
         "rootDir": "./src/scripts",
         "strict": true,
         "esModuleInterop": true,
-        "lib": ["ES6", "DOM"]
+        "lib": ["ES6", "DOM"],
+        "moduleResolution": "node",
+        "resolveJsonModule": true
     },
     "include": ["src/scripts/**/*.ts"],
     "exclude": ["node_modules"]
